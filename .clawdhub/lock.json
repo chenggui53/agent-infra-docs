@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "skill-creator": {
+      "version": "0.1.0",
+      "installedAt": 1769785391207
+    },
+    "weather": {
+      "version": "1.0.0",
+      "installedAt": 1769785398010
+    },
+    "bluebubbles": {
+      "version": "1.0.0",
+      "installedAt": 1769785407128
+    },
+    "feishu-bridge": {
+      "version": "1.0.0",
+      "installedAt": 1769785525902
+    },
+    "feishu-file-fetch": {
+      "version": "1.0.0",
+      "installedAt": 1769785532791
+    },
+    "feishu-leave-request": {
+      "version": "1.0.1",
+      "installedAt": 1769785541790
+    }
+  }
+}

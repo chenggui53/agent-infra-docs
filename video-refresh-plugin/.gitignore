@@ -1,0 +1,17 @@
+# 依赖包
+node_modules/
+
+# 打包文件
+dist/
+*.zip
+
+# 临时文件
+*.log
+.DS_Store
+
+# 开发文件
+.vscode/
+*.swp
+
+# 用户数据
+user-data/

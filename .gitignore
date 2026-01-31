@@ -1,0 +1,89 @@
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+*.log.*
+logs/
+*.err
+
+# 配置文件
+*.config
+*.properties
+*.env
+.env*
+!*.env.example
+
+# 依赖目录
+node_modules/
+venv/
+env/
+*.venv/
+__pycache__/
+*.pyc
+
+# 编译输出
+*.pyc
+*.pyo
+*.so
+*.dylib
+*.dll
+build/
+dist/
+*.egg-info/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# IDE 文件
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sublime-*
+*.swp
+
+# 浏览器插件临时文件
+video-refresh-plugin/dist/
+video-refresh-plugin/build/
+
+# 临时目录
+tmp/
+temp/
+.cache/
+.tmp/
+.temp/
+
+# 敏感文件
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.jks
+*.keystore
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+
+# 打包文件
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z

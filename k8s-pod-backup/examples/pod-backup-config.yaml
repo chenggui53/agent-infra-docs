@@ -1,0 +1,246 @@
+# Kubernetes Pod 备份配置示例
+
+# 此配置文件包含 Kubernetes Pod 备份的相关设置和策略
+
+# 备份存储配置
+backupStorage:
+  # 本地存储配置
+  local:
+    # 备份文件存储路径
+    path: /backup/kubernetes/pods
+    # 备份文件保留时间（天）
+    retentionPeriod: 30
+    # 是否启用压缩
+    compression: true
+    # 压缩算法（gzip, bzip2, xz）
+    compressionAlgorithm: gzip
+
+  # 云存储配置（可选）
+  cloud:
+    # 启用云存储
+    enabled: false
+    # 云存储提供商（aws, azure, google）
+    provider: aws
+    # 存储桶名称
+    bucket: kubernetes-backups
+    # 区域
+    region: us-east-1
+    # 访问密钥
+    accessKeyId: YOUR_ACCESS_KEY
+    # 秘密密钥
+    secretAccessKey: YOUR_SECRET_KEY
+
+# 备份策略配置
+backupPolicy:
+  # 备份频率（分钟）
+  frequency: 60
+  # 备份保留策略
+  retention:
+    # 每日备份保留时间（天）
+    daily: 7
+    # 每周备份保留时间（周）
+    weekly: 4
+    # 每月备份保留时间（月）
+    monthly: 12
+
+# 备份对象配置
+backupTargets:
+  # 命名空间白名单
+  includeNamespaces:
+    - default
+    - my-app
+    - staging
+
+  # 命名空间黑名单
+  excludeNamespaces:
+    - kube-system
+    - kube-public
+    - kube-node-lease
+
+  # Pod 标签选择器
+  podSelectors:
+    - "app=my-app"
+    - "env=production"
+
+  # 需要备份的资源类型
+  resources:
+    - pods
+    - services
+    - configmaps
+    - secrets
+    - ingresses
+
+# 备份作业配置
+backupJob:
+  # 备份作业名称
+  name: kubernetes-pod-backup
+  # 备份作业命名空间
+  namespace: backup-system
+  # 备份作业图像
+  image: velero/velero:v1.12.0
+  # 备份作业资源请求
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+# 备份通知配置
+notifications:
+  # 启用通知
+  enabled: true
+  # 通知方法配置
+  methods:
+    # 电子邮件通知
+    email:
+      enabled: true
+      smtpServer: smtp.gmail.com
+      smtpPort: 587
+      fromAddress: backup@example.com
+      toAddresses:
+        - admin@example.com
+        - devops@example.com
+
+    # Slack 通知
+    slack:
+      enabled: false
+      webhookUrl: https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK
+      channel: #kubernetes-backup
+      username: Kubernetes Backup Bot
+
+    # 企业微信通知
+    wechat:
+      enabled: false
+      webhookUrl: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_WECHAT_WEBHOOK_KEY
+      agentId: 1000002
+
+# 备份验证配置
+validation:
+  # 启用备份验证
+  enabled: true
+  # 验证方法
+  methods:
+    # 备份文件完整性检查
+    checksumVerification: true
+    # 备份内容验证
+    contentValidation: true
+    # 备份可读性验证
+    readabilityTest: true
+
+# 恢复测试配置
+recoveryTest:
+  # 启用恢复测试
+  enabled: false
+  # 恢复测试频率（天）
+  frequency: 7
+  # 恢复测试命名空间
+  testNamespace: recovery-test
+  # 需要测试的资源
+  testResources:
+    - pods
+    - services
+    - configmaps
+
+# 安全配置
+security:
+  # 备份加密
+  encryption:
+    enabled: true
+    algorithm: aes-256-cbc
+    key: YOUR_ENCRYPTION_KEY
+
+  # 访问控制
+  accessControl:
+    user: backup-user
+    group: backup-group
+    permissions: 0640
+
+  # 审计日志
+  audit:
+    enabled: true
+    logPath: /var/log/backup-audit.log
+    logLevel: info
+
+# 监控和指标
+monitoring:
+  # 启用 Prometheus 指标
+  prometheus:
+    enabled: true
+    port: 8080
+    path: /metrics
+
+  # 告警规则
+  alerts:
+    # 备份失败告警
+    backupFailed:
+      enabled: true
+      severity: critical
+
+    # 备份存储不足告警
+    storageLow:
+      enabled: true
+      severity: warning
+      threshold: 80
+
+    # 备份频率异常告警
+    frequencyViolation:
+      enabled: true
+      severity: warning
+      threshold: 120
+
+# 调度配置
+schedule:
+  # 备份作业调度（Cron 表达式）
+  backupSchedule: "0 2 * * *"
+  # 清理作业调度
+  cleanupSchedule: "0 3 * * *"
+  # 验证作业调度
+  validationSchedule: "0 4 * * *"
+
+# 恢复配置
+recovery:
+  # 恢复目标命名空间
+  targetNamespace: default
+  # 恢复时保留原始资源
+  preserveResources:
+    - configmaps
+    - secrets
+
+  # 恢复时需要修改的字段
+  modifyFields:
+    - apiVersion
+    - kind
+    - metadata.name
+    - metadata.namespace
+
+# 高级配置
+advanced:
+  # 备份并行度
+  parallelism: 4
+  # 备份超时时间（分钟）
+  timeout: 120
+  # 重试次数
+  retries: 3
+  # 重试间隔（秒）
+  retryInterval: 30
+
+  # 临时存储配置
+  tempStorage:
+    path: /tmp/backup
+    sizeLimit: 10G
+
+  # 网络配置
+  network:
+    proxy: ""
+    timeout: 30
+
+# 调试配置
+debug:
+  # 启用调试日志
+  enabled: false
+  # 日志级别
+  logLevel: debug
+  # 日志输出格式
+  logFormat: json
