@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人知识库</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 头部 */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* 导航 */
+        nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 1rem 0;
+        }
+        
+        nav ul li {
+            margin: 0 1rem;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+        
+        nav ul li a:hover {
+            color: #667eea;
+            background-color: #f0f0f0;
+        }
+        
+        /* 主要内容 */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        /* 文章列表 */
+        .posts {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .post-card h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .post-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .post-summary {
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+        
+        .read-more {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .read-more:hover {
+            color: #764ba2;
+        }
+        
+        /* 侧边栏 */
+        aside {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .widget {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .widget h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .widget ul {
+            list-style: none;
+        }
+        
+        .widget ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .widget ul li a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        
+        .widget ul li a:hover {
+            color: #667eea;
+            background-color: #f0f0f0;
+        }
+        
+        /* 分类标签 */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 页脚 */
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+        }
+        
+        /* 搜索功能 */
+        .search-box {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            border-color: #667eea;
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .post-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header>
+        <div class="container">
+            <h1>个人知识库</h1>
+            <p class="subtitle">记录学习过程中的知识、经验和思考</p>
+        </div>
+    </header>
+    
+    <!-- 导航 -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#home">首页</a></li>
+                <li><a href="#categories">分类</a></li>
+                <li><a href="#tags">标签</a></li>
+                <li><a href="#about">关于</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索知识库..." onkeyup="searchPosts()">
+        </div>
+        
+        <main>
+            <!-- 文章列表 -->
+            <section class="posts" id="postsContainer">
+                <!-- 文章卡片将通过 JavaScript 动态加载 -->
+            </section>
+            
+            <!-- 侧边栏 -->
+            <aside>
+                <!-- 分类 -->
+                <div class="widget">
+                    <h3>知识分类</h3>
+                    <ul id="categoryList">
+                        <!-- 分类将通过 JavaScript 动态加载 -->
+                    </ul>
+                </div>
+                
+                <!-- 标签 -->
+                <div class="widget">
+                    <h3>热门标签</h3>
+                    <div class="tags" id="tagCloud">
+                        <!-- 标签将通过 JavaScript 动态加载 -->
+                    </div>
+                </div>
+                
+                <!-- 统计信息 -->
+                <div class="widget">
+                    <h3>知识库统计</h3>
+                    <ul>
+                        <li>总文章数: <span id="totalPosts">0</span></li>
+                        <li>总分类数: <span id="totalCategories">0</span></li>
+                        <li>总标签数: <span id="totalTags">0</span></li>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <p>© 2026 个人知识库 | 使用 GitHub Pages 托管</p>
+            <p>知识是最好的投资</p>
+        </div>
+    </footer>
+    
+    <script>
+        // 知识库数据（从 Markdown 文件解析）
+        const knowledgeData = {
+            categories: [
+                { name: "架构技术", count: 12, icon: "🏗️" },
+                { name: "项目经验", count: 8, icon: "💼" },
+                { name: "学习记录", count: 15, icon: "📖" }
+            ],
+            tags: [
+                { name: "Serverless", count: 5, color: "#667eea" },
+                { name: "FaaS", count: 4, color: "#764ba2" },
+                { name: "Kubernetes", count: 3, color: "#f093fb" },
+                { name: "AI", count: 6, color: "#f5576c" },
+                { name: "前端开发", count: 8, color: "#4facfe" }
+            ],
+            posts: [
+                {
+                    id: 1,
+                    title: "FaaS（函数即服务）关键技术研究",
+                    date: "2026-01-31",
+                    category: "架构技术",
+                    tags: ["Serverless", "FaaS"],
+                    summary: "深入研究了函数即服务（FaaS）架构的核心技术，包括事件驱动、自动扩缩容、冷启动优化等关键技术要点。",
+                    content: "详细的内容将在这里展示..."
+                },
+                {
+                    id: 2,
+                    title: "云扩张与 AI Robot 操作",
+                    date: "2026-01-31",
+                    category: "架构技术",
+                    tags: ["云计算", "AI"],
+                    summary: "探讨了云计算进一步扩张的趋势，以及如何通过 AI 机器人进行云端操作和管理。",
+                    content: "详细的内容将在这里展示..."
+                },
+                {
+                    id: 3,
+                    title: "VNC、noVNC 和 xrdp 技术详解",
+                    date: "2026-01-31",
+                    category: "架构技术",
+                    tags: ["远程操作", "网络"],
+                    summary: "全面介绍了 VNC 技术体系，包括基础架构、部署方法、安全配置和性能优化。",
+                    content: "详细的内容将在这里展示..."
+                },
+                {
+                    id: 4,
+                    title: "浏览器插件开发：视频自动刷新学习助手",
+                    date: "2026-01-30",
+                    category: "项目经验",
+                    tags: ["前端开发", "浏览器插件"],
+                    summary: "开发了一款浏览器插件，用于自动刷新视频学习页面，提高学习效率。",
+                    content: "详细的内容将在这里展示..."
+                },
+                {
+                    id: 5,
+                    title: "飞书桥接器：与飞书集成的智能代理",
+                    date: "2026-01-29",
+                    category: "项目经验",
+                    tags: ["AI", "企业应用"],
+                    summary: "实现了一个与飞书集成的智能代理，支持卡片消息和交互式操作。",
+                    content: "详细的内容将在这里展示..."
+                }
+            ]
+        };
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载文章列表
+            loadPosts();
+            
+            // 加载分类
+            loadCategories();
+            
+            // 加载标签
+            loadTags();
+            
+            // 更新统计信息
+            updateStatistics();
+        });
+        
+        // 加载文章列表
+        function loadPosts(posts = knowledgeData.posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                postCard.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <div class="post-meta">
+                        <span>📅 ${post.date}</span>
+                        <span>🏷️ ${post.category}</span>
+                    </div>
+                    <p class="post-summary">${post.summary}</p>
+                    <div class="tags">
+                        ${post.tags.map(tag => `<a href="#" class="tag">${tag}</a>`).join('')}
+                    </div>
+                    <a href="#" class="read-more">阅读更多 →</a>
+                `;
+                container.appendChild(postCard);
+            });
+        }
+        
+        // 加载分类
+        function loadCategories() {
+            const categoryList = document.getElementById('categoryList');
+            knowledgeData.categories.forEach(category => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#${category.name}">${category.icon} ${category.name} (${category.count})</a>`;
+                categoryList.appendChild(li);
+            });
+        }
+        
+        // 加载标签
+        function loadTags() {
+            const tagCloud = document.getElementById('tagCloud');
+            knowledgeData.tags.forEach(tag => {
+                const tagElement = document.createElement('a');
+                tagElement.href = '#';
+                tagElement.className = 'tag';
+                tagElement.style.backgroundColor = tag.color;
+                tagElement.textContent = `${tag.name} (${tag.count})`;
+                tagCloud.appendChild(tagElement);
+            });
+        }
+        
+        // 更新统计信息
+        function updateStatistics() {
+            document.getElementById('totalPosts').textContent = knowledgeData.posts.length;
+            document.getElementById('totalCategories').textContent = knowledgeData.categories.length;
+            document.getElementById('totalTags').textContent = knowledgeData.tags.length;
+        }
+        
+        // 搜索功能
+        function searchPosts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredPosts = knowledgeData.posts.filter(post => 
+                post.title.toLowerCase().includes(searchTerm) ||
+                post.summary.toLowerCase().includes(searchTerm) ||
+                post.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+            loadPosts(filteredPosts);
+        }
+    </script>
+</body>
+</html>
