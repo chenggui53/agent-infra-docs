@@ -1,0 +1,31 @@
+{
+  "name": "personal-knowledge-base",
+  "version": "1.0.0",
+  "description": "个人知识库 - 记录学习过程中的知识、经验和思考",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vuepress dev",
+    "build": "vuepress build",
+    "clean": "rm -rf _site",
+    "deploy": "npm run build && ./deploy.sh",
+    "preview": "vuepress preview"
+  },
+  "keywords": [
+    "knowledge-base",
+    "personal-website",
+    "markdown",
+    "static-site",
+    "vuepress"
+  ],
+  "author": "Xiong Qi",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-footnote": "^3.0.3",
+    "markdown-it-task-lists": "^2.1.1"
+  },
+  "devDependencies": {
+    "vuepress": "^1.9.10"
+  }
+}

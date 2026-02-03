@@ -24,6 +24,34 @@
     "feishu-leave-request": {
       "version": "1.0.1",
       "installedAt": 1769785541790
+    },
+    "moltbook-interact": {
+      "version": "1.0.1",
+      "installedAt": 1769868869637
+    },
+    "openclaw-feeds": {
+      "version": "3.1.1",
+      "installedAt": 1769904874223
+    },
+    "openclaw-serper": {
+      "version": "3.1.1",
+      "installedAt": 1769904881552
+    },
+    "gcalcli": {
+      "version": "0.1.0",
+      "installedAt": 1769904888348
+    },
+    "birthday-reminder": {
+      "version": "1.0.0",
+      "installedAt": 1769904894759
+    },
+    "whisper-mlx-local": {
+      "version": "1.2.0",
+      "installedAt": 1769904901368
+    },
+    "github": {
+      "version": "1.0.0",
+      "installedAt": 1769904915039
     }
   }
 }

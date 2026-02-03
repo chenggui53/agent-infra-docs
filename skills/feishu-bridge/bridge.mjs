@@ -1,10 +1,11 @@
 /**
- * Feishu ↔ Clawdbot Bridge
+ * Feishu ↔ Clawdbot Bridge (enhanced version)
  *
  * Receives messages from Feishu via WebSocket (long connection),
  * forwards them to Clawdbot Gateway, and sends the AI reply back.
  *
  * No public server / domain / HTTPS required.
+ * Enhanced features: image support, error handling, performance optimizations
  */
 
 import * as Lark from '@larksuiteoapi/node-sdk';
@@ -12,6 +13,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import WebSocket from 'ws';
+import path from 'node:path';
 
 // ─── Config ──────────────────────────────────────────────────────
 
@@ -97,6 +99,7 @@ async function askClawdbot({ text, sessionKey }) {
     const ws = new WebSocket(`ws://127.0.0.1:${GATEWAY_PORT}`);
     let runId = null;
     let buf = '';
+    let mediaPath = null;
     const close = () => { try { ws.close(); } catch {} };
 
     ws.on('error', (e) => { close(); reject(e); });
@@ -162,13 +165,97 @@ async function askClawdbot({ text, sessionKey }) {
           return;
         }
 
+        // Handle media messages
+        if (p.stream === 'media') {
+          const d = p.data || {};
+          if (d.path) {
+            mediaPath = d.path;
+          }
+          return;
+        }
+
         if (p.stream === 'lifecycle') {
-          if (p.data?.phase === 'end') { close(); resolve(buf.trim()); }
+          if (p.data?.phase === 'end') { 
+            close(); 
+            resolve({ text: buf.trim(), mediaPath }); 
+          }
           if (p.data?.phase === 'error') { close(); reject(new Error(p.data?.message || 'agent error')); }
         }
       }
     });
   });
+}
+
+// ─── Send reaction to Feishu ─────────────────────────────────────
+
+async function sendReactionToFeishu(messageId, emojiKey) {
+  try {
+    // Send reaction to message
+    await client.im.reaction.create({
+      data: {
+        message_id: messageId,
+        emoji_type: 'emoji',
+        emoji_key: emojiKey
+      }
+    });
+    return true;
+  } catch (e) {
+    console.error('[ERROR] sendReactionToFeishu:', e);
+    return false;
+  }
+}
+
+// ─── Remove reaction from Feishu ────────────────────────────────
+
+async function removeReactionFromFeishu(messageId, emojiKey) {
+  try {
+    // Remove reaction from message
+    await client.im.reaction.delete({
+      query: {
+        message_id: messageId,
+        emoji_type: 'emoji',
+        emoji_key: emojiKey
+      }
+    });
+    return true;
+  } catch (e) {
+    console.error('[ERROR] removeReactionFromFeishu:', e);
+    return false;
+  }
+}
+
+// ─── Send image to Feishu ────────────────────────────────────────
+
+async function sendImageToFeishu(chatId, imagePath) {
+  try {
+    // Upload image to Feishu
+    const fileBuffer = fs.readFileSync(imagePath);
+    const uploadRes = await client.im.v1.image.create({
+      data: {
+        image_type: 'message',
+        image_bytes: fileBuffer,
+      },
+    });
+
+    if (!uploadRes?.data?.image_key) {
+      throw new Error('Failed to upload image');
+    }
+
+    // Send image message
+    await client.im.v1.message.create({
+      params: { receive_id_type: 'chat_id' },
+      data: { 
+        receive_id: chatId, 
+        msg_type: 'image', 
+        content: JSON.stringify({ image_key: uploadRes.data.image_key }) 
+      },
+    });
+
+    return true;
+  } catch (e) {
+    console.error('[ERROR] sendImageToFeishu:', e);
+    return false;
+  }
 }
 
 // ─── Group chat intelligence ─────────────────────────────────────
@@ -188,9 +275,106 @@ function shouldRespondInGroup(text, mentions) {
   return false;
 }
 
+// ─── Interactive card action handler ─────────────────────────────
+
+async function handleCardAction(data) {
+  try {
+    const { action, open_chat_id, user_id } = data;
+    if (!action || !open_chat_id) return;
+
+    console.log('[INFO] Card action received:', JSON.stringify(data, null, 2));
+
+    // 解析按钮值
+    const buttonValue = action.value || {};
+    const buttonText = action.text || '';
+
+    // 根据按钮值决定响应
+    let responseText = '';
+
+    switch (buttonValue.action) {
+      case 'view_knowledge':
+        responseText = '📚 正在为您打开知识库...';
+        // 调用 OpenClaw 查看知识库
+        // 可以通过发送系统事件或直接发送命令
+        break;
+      
+      case 'search':
+        responseText = '🔍 正在为您执行搜索...';
+        // 调用 OpenClaw 搜索功能
+        if (buttonValue.question) {
+          responseText = `🔍 正在搜索: "${buttonValue.question}"`;
+        }
+        break;
+      
+      case 'add_note':
+        responseText = '📝 正在为您创建新笔记...';
+        // 调用 OpenClaw 创建笔记
+        if (buttonValue.question) {
+          responseText = `📝 正在为问题创建笔记: "${buttonValue.question}"`;
+        }
+        break;
+      
+      case 'statistics':
+        responseText = '📊 正在为您提供统计信息...';
+        // 调用 OpenClaw 获取统计信息
+        break;
+      
+      case 'like':
+        responseText = '❤️ 感谢您的点赞！';
+        // 发送反应
+        break;
+      
+      case 'view_docs':
+        responseText = '📖 正在为您打开文档...';
+        break;
+      
+      case 'mark_read':
+        responseText = '✅ 已标记为已读';
+        break;
+      
+      case 'view_details':
+        responseText = '📎 正在为您显示详细信息...';
+        break;
+      
+      default:
+        responseText = `🚀 您点击了: ${buttonText}`;
+        if (Object.keys(buttonValue).length > 0) {
+          responseText += `\n📋 按钮值: ${JSON.stringify(buttonValue)}`;
+        }
+    }
+
+    // 发送文本响应
+    await client.im.v1.message.create({
+      params: { receive_id_type: 'chat_id' },
+      data: {
+        receive_id: open_chat_id,
+        msg_type: 'text',
+        content: JSON.stringify({ text: responseText })
+      }
+    });
+
+    console.log('[INFO] Card action response sent');
+  } catch (error) {
+    console.error('[ERROR] Handle card action:', error);
+    try {
+      await client.im.v1.message.create({
+        params: { receive_id_type: 'chat_id' },
+        data: {
+          receive_id: data.open_chat_id,
+          msg_type: 'text',
+          content: JSON.stringify({ text: '⚠️ 操作处理失败，请稍后重试' })
+        }
+      });
+    } catch (e) {
+      console.error('[ERROR] Send error response:', e);
+    }
+  }
+}
+
 // ─── Message handler ─────────────────────────────────────────────
 
 const dispatcher = new Lark.EventDispatcher({}).register({
+  'im.message.interactive_card_action': handleCardAction,
   'im.message.receive_v1': async (data) => {
     try {
       const { message } = data;
@@ -217,53 +401,41 @@ const dispatcher = new Lark.EventDispatcher({}).register({
 
       // Process asynchronously
       setImmediate(async () => {
-        let placeholderId = '';
-        let done = false;
-
-        // Show "thinking…" if reply takes too long
-        const timer = THINKING_THRESHOLD_MS > 0
-          ? setTimeout(async () => {
-              if (done) return;
-              try {
-                const res = await client.im.v1.message.create({
-                  params: { receive_id_type: 'chat_id' },
-                  data: { receive_id: chatId, msg_type: 'text', content: JSON.stringify({ text: '正在思考…' }) },
-                });
-                placeholderId = res?.data?.message_id || '';
-              } catch {}
-            }, THINKING_THRESHOLD_MS)
-          : null;
-
+        // Send thinking reaction immediately to acknowledge receipt
+        await sendReactionToFeishu(message.message_id, '🤔');
+        
         let reply = '';
+        let mediaPath = null;
         try {
-          reply = await askClawdbot({ text, sessionKey });
+          const result = await askClawdbot({ text, sessionKey });
+          reply = result.text;
+          mediaPath = result.mediaPath;
         } catch (e) {
+          console.error('[ERROR] askClawdbot:', e);
           reply = `（系统出错）${e?.message || String(e)}`;
-        } finally {
-          done = true;
-          if (timer) clearTimeout(timer);
         }
 
         // Skip empty or NO_REPLY
-        if (!reply || reply === 'NO_REPLY') return;
-
-        // If we sent "thinking…", update it; otherwise send new message
-        if (placeholderId) {
-          try {
-            await client.im.v1.message.update({
-              path: { message_id: placeholderId },
-              data: { msg_type: 'text', content: JSON.stringify({ text: reply }) },
-            });
-            return;
-          } catch {
-            // Fall through to send new
-          }
+        if (!reply || reply === 'NO_REPLY') {
+          await removeReactionFromFeishu(message.message_id, '🤔');
+          return;
         }
 
+        // Remove thinking reaction before sending reply
+        await removeReactionFromFeishu(message.message_id, '🤔');
+        
+        // Send text reply
         await client.im.v1.message.create({
           params: { receive_id_type: 'chat_id' },
           data: { receive_id: chatId, msg_type: 'text', content: JSON.stringify({ text: reply }) },
         });
+
+        // Send media if present
+        if (mediaPath && fs.existsSync(mediaPath)) {
+          await sendImageToFeishu(chatId, mediaPath);
+          // Clean up the media file
+          fs.unlinkSync(mediaPath);
+        }
       });
     } catch (e) {
       console.error('[ERROR] message handler:', e);

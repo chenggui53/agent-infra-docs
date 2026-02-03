@@ -1,0 +1,72 @@
+# GitHub Pages 配置
+title: 个人知识库
+description: 记录学习过程中的知识、经验和思考
+baseurl: ""
+url: "" # 您的 GitHub Pages 地址，例如 https://yourusername.github.io/your-repo
+
+# 作者信息
+author:
+  name: 你的名字
+  email: your@email.com
+  description: 技术学习者
+
+# 构建设置
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+paginate: 5
+sass:
+  style: compressed
+
+# 插件
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# 导航菜单
+header_pages:
+  - index.html
+  - about.md
+
+# 主题
+theme: minima
+remote_theme: jekyll/minima
+
+# 网站设置
+google_analytics: # 您的 Google Analytics 跟踪 ID
+disqus: # 您的 Disqus 论坛名称
+
+# 项目设置
+github:
+  repo: # 您的 GitHub 仓库地址，例如 username/repo
+
+# 社交链接
+social:
+  - name: GitHub
+    icon: github
+    username: yourusername
+    url: https://github.com/yourusername
+  - name: Twitter
+    icon: twitter
+    username: yourusername
+    url: https://twitter.com/yourusername
+  - name: Email
+    icon: envelope
+    username: your@email.com
+    url: mailto:your@email.com
+
+# 知识库分类
+categories:
+  - 架构技术
+  - 项目经验
+  - 学习记录
+
+# 知识库标签
+tags:
+  - Serverless
+  - FaaS
+  - Kubernetes
+  - AI
+  - 前端开发
