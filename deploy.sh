@@ -10,7 +10,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 配置变量
-REPO_NAME="personal-knowledge-base"
+REPO_NAME="agent-infra-docs"
 BRANCH="gh-pages"
 SOURCE_DIR="."
 BUILD_DIR="_site"
@@ -37,8 +37,8 @@ fi
 if [ ! -d ".git" ]; then
     echo -e "${YELLOW}未找到 Git 仓库，初始化...${NC}"
     git init
-    git config user.name "你的名字"
-    git config user.email "你的邮箱"
+    git config user.name "chenggui53"
+    git config user.email "chenggui53@gmail.com"
 fi
 
 # 检查远程仓库

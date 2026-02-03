@@ -2,7 +2,7 @@ module.exports = {
   title: '个人知识库',
   description: '记录学习过程中的知识、经验和思考',
   lang: 'zh-CN',
-  base: '/',
+  base: '/agent-infra-docs/',
   dest: '_site',
   
   themeConfig: {
